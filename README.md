@@ -2,7 +2,7 @@
 
 A lightweight, full-stack collaborative document editor inspired by Google Docs. Built with **Python (FastAPI)**, **SQLite**, and **vanilla HTML/CSS/JavaScript + Quill.js** with zero frontend build step.
 
-**Live Demo:** [https://ajaia-docs-demo.onrender.com](https://ajaia-docs-demo.onrender.com) *(placeholder — replace with deployed Render URL)*
+**Live Demo:** [https://ajaia-docs-demo.onrender.com](https://shared-document-editor.onrender.com/) *(placeholder — replace with deployed Render URL)*
 
 ---
 
