@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajaia Docs — Collaborative Document Editor</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z' fill='%231a73e8'/%3E%3C/svg%3E" />
+  <!-- Quill.js v2 Snow Theme via CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- Top Application Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <button id="sidebar-toggle-btn" class="icon-btn mobile-only" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="brand" title="Ajaia Docs">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#1a73e8"/>
+            <path d="M14 2v6h6" fill="#aecbfa"/>
+            <line x1="8" y1="13" x2="16" y2="13" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="8" y1="17" x2="13" y2="17" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="brand-name">Ajaia Docs</span>
+      </div>
+
+      <div class="header-divider" aria-hidden="true"></div>
+
+      <div id="doc-header-meta" class="doc-header-meta hidden">
+        <input
+          id="doc-title-input"
+          class="doc-title-input"
+          type="text"
+          maxlength="200"
+          placeholder="Untitled Document"
+          aria-label="Document title"
+          title="Click to rename document"
+        />
+        <span id="doc-access-pill" class="doc-access-pill"></span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div id="editor-actions" class="editor-actions hidden">
+        <div id="save-status" class="save-status saved" role="status" aria-live="polite">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="save-status-text">Saved</span>
+        </div>
+
+        <button id="save-btn" class="btn btn-secondary" type="button" title="Save document (Ctrl+S)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span>Save</span>
+        </button>
+
+        <button id="share-btn" class="btn btn-primary" type="button" title="Manage document sharing">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+          <span id="share-btn-label">Share</span>
+        </button>
+      </div>
+
+      <div class="user-switcher-wrap">
+        <label for="user-switcher" class="user-switcher-label">Current User</label>
+        <div class="user-select-box">
+          <span id="user-avatar" class="user-avatar" aria-hidden="true">A</span>
+          <select id="user-switcher" class="user-switcher" aria-label="Switch active demo user"></select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-actions">
+        <button id="new-doc-btn" class="btn btn-new-doc" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Document</span>
+        </button>
+
+        <div id="upload-dropzone" class="upload-card">
+          <input
+            id="file-upload-input"
+            type="file"
+            accept=".txt,.md,.docx"
+            class="visually-hidden"
+          />
+          <button id="import-file-btn" class="btn btn-outline-full" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span id="import-btn-label">Import File</span>
+          </button>
+          <p class="upload-hint">
+            Supported: <code>.txt</code>, <code>.md</code>, <code>.docx</code> (max 5 MB)
+          </p>
+        </div>
+      </div>
+
+      <nav class="sidebar-lists" aria-label="Document navigation">
+        <section class="doc-section">
+          <div class="doc-section-header">
+            <h2>My Documents</h2>
+            <span id="owned-count" class="section-count">0</span>
+          </div>
+          <ul id="owned-docs-list" class="doc-list"></ul>
+        </section>
+
+        <section class="doc-section">
+          <div class="doc-section-header">
+            <h2>Shared With Me</h2>
+            <span id="shared-count" class="section-count">0</span>
+          </div>
+          <ul id="shared-docs-list" class="doc-list"></ul>
+        </section>
+      </nav>
+    </aside>
+
+    <!-- Main Document Workspace -->
+    <main class="workspace">
+      <!-- Empty State (shown when user has no accessible documents selected) -->
+      <section id="empty-state" class="empty-state hidden">
+        <div class="empty-state-card">
+          <div class="empty-icon" aria-hidden="true">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="1.6">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+          </div>
+          <h2 id="empty-state-title">No document open</h2>
+          <p id="empty-state-subtitle">
+            Create a blank document or import a <strong>.txt</strong>, <strong>.md</strong>, or <strong>.docx</strong> file from the sidebar to start editing.
+          </p>
+          <div class="empty-state-actions">
+            <button id="empty-new-doc-btn" class="btn btn-primary" type="button">Create New Document</button>
+            <button id="empty-import-btn" class="btn btn-secondary" type="button">Import File</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Rich-Text Editor View -->
+      <section id="editor-shell" class="editor-shell hidden">
+        <div id="quill-toolbar" class="quill-toolbar-bar">
+          <span class="ql-formats">
+            <select class="ql-header" aria-label="Text style">
+              <option value="1">Heading 1</option>
+              <option value="2">Heading 2</option>
+              <option value="3">Heading 3</option>
+              <option selected>Normal text</option>
+            </select>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-bold" title="Bold (Ctrl+B)"></button>
+            <button class="ql-italic" title="Italic (Ctrl+I)"></button>
+            <button class="ql-underline" title="Underline (Ctrl+U)"></button>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-list" value="bullet" title="Bulleted list"></button>
+            <button class="ql-list" value="ordered" title="Numbered list"></button>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-clean" title="Clear formatting"></button>
+          </span>
+        </div>
+
+        <div class="canvas-scroll">
+          <div class="document-page">
+            <div id="quill-editor"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Share Document Modal -->
+  <div id="share-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 id="share-modal-title">Share Document</h2>
+          <p id="share-modal-subtitle" class="modal-subtitle"></p>
+        </div>
+        <button id="close-share-modal-btn" class="icon-btn" type="button" aria-label="Close share dialog">&times;</button>
+      </div>
+
+      <div id="share-owner-only-notice" class="info-banner hidden">
+        Only the document owner can grant or revoke access.
+      </div>
+
+      <form id="share-form" class="share-form">
+        <label for="share-user-select" class="form-label">Grant edit access to</label>
+        <div class="share-form-row">
+          <select id="share-user-select" class="form-select"></select>
+          <button id="grant-share-btn" class="btn btn-primary" type="submit">Share</button>
+        </div>
+      </form>
+
+      <div class="people-access-section">
+        <h3 class="section-subheading">People with access</h3>
+        <ul id="share-people-list" class="people-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Quill.js v2 via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
